@@ -1,9 +1,14 @@
 package sit.project221.oasipbackend.entities;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.time.Instant;
+import java.time.LocalDateTime;
 
 @Entity
+@Getter @Setter
 @Table(name = "user")
 public class User {
     @Id
@@ -18,61 +23,18 @@ public class User {
     private String email;
 
     @Lob
+//    @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private String role;
 
     @Column(name = "createdOn", nullable = false)
-    private Instant createdOn;
+    private LocalDateTime createdOn;
 
     @Column(name = "updateOn", nullable = false)
-    private Instant updateOn;
+    private LocalDateTime updateOn;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public Instant getCreatedOn() {
-        return createdOn;
-    }
-
-    public void setCreatedOn(Instant createdOn) {
-        this.createdOn = createdOn;
-    }
-
-    public Instant getUpdateOn() {
-        return updateOn;
-    }
-
-    public void setUpdateOn(Instant updateOn) {
-        this.updateOn = updateOn;
+    public enum role {
+        admin, lecturer, student;
     }
 
 }
