@@ -27,13 +27,13 @@ public class User {
     @Column(name = "role", nullable = false)
     private String role;
 
-    @Column(name = "createdOn", nullable = false)
+    @Column(name = "createdOn", nullable = false , insertable = false)
     private LocalDateTime createdOn;
 
-    @Column(name = "updateOn", nullable = false)
+    @Column(name = "updateOn", nullable = false , insertable = false , updatable = false)
     private LocalDateTime updateOn;
 
-    public enum role {
+    public enum Role {
         admin, lecturer, student;
     }
 

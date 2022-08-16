@@ -39,7 +39,11 @@ public class UserService {
 
     public User AddUser(AddUserDTO newUser){
         User addUserList = modelMapper.map(newUser, User.class);
-        return userRepository.saveAndFlush(addUserList);
+        if(newUser.getRole().equals(Role.admin) || newUser.getRole().equals(Role.lecturer) || newUser.getRole().equals(Role.student)){
+            return userRepository.saveAndFlush(addUserList);
+        }else{
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST , "Role is not define");
+        }
     }
     public UpdateUserDTO updateUser(UpdateUserDTO updateUser, Integer id){
         User user = userRepository.findById(id).orElseThrow(()->
@@ -59,5 +63,7 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-
+    public enum Role {
+        admin, lecturer, student;
+    }
 }
