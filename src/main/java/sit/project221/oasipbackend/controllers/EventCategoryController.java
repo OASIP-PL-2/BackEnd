@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
+import sit.project221.oasipbackend.dtos.AddCategoryDTO;
 import sit.project221.oasipbackend.dtos.GetEventCategoryDTO;
 import sit.project221.oasipbackend.dtos.UpdateEventCategoryDTO;
 import sit.project221.oasipbackend.dtos.UpdateEventDTO;
@@ -39,6 +40,10 @@ public class EventCategoryController {
         return eventCategoryService.updateEventCategory(updateEventCategory, categoryId);
     }
 
+    @PostMapping("")
+    public void addCategory(@RequestBody AddCategoryDTO newCategory) {
+        eventCategoryService.addEventCategory(newCategory);
+    }
 //    @GetMapping("/{categories}/events")
 //    public List<GetEventDTO> getEventByCategory(@PathVariable Integer categoryId) {
 //        return eventService.getEventByCategory(categoryId);

@@ -45,6 +45,7 @@ public class EventService {
         List<Event> eventList = eventRepository.findEventByEventCategoryIdEquals(addEventList.getEventCategoryId());
         checkTimeOverLap(newEvent.getEventStartTime(), newEvent.getEventDuration(),eventList );
         return eventRepository.saveAndFlush(addEventList);
+
     }
 
     private void checkTimeOverLap(LocalDateTime updateDateTime, Integer newEventDuration, List<Event> eventList) {

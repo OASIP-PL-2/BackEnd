@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import sit.project221.oasipbackend.controllers.ValidationHandler;
+import sit.project221.oasipbackend.dtos.AddCategoryDTO;
 import sit.project221.oasipbackend.dtos.GetEventCategoryDTO;
 import sit.project221.oasipbackend.dtos.UpdateEventCategoryDTO;
 import sit.project221.oasipbackend.entities.EventCategory;
@@ -53,6 +54,9 @@ public class EventCategoryService {
         updateCategory.setEventDuration(updateEventCategory.getEventDuration());
         eventCategoryRepository.saveAndFlush(updateCategory);
         return updateEventCategory;
+    }
+    public void addEventCategory(AddCategoryDTO newCategory){
+        eventCategoryRepository.insertCategory(newCategory.getEventCategoryName(), newCategory.getEventDuration());
     }
 
 //
