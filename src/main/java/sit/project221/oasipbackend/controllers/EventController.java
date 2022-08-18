@@ -30,7 +30,9 @@ public class EventController {
         return eventService.getEventById(bookingId);
     }
 
-
+    //Category ID
+    @GetMapping("/categories/{categoryID}")
+    public List<GetEventDTO> getEventByCategory(@PathVariable Integer categoryID) { return eventService.getEventByCategory(categoryID);}
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")

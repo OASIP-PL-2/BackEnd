@@ -12,7 +12,9 @@ import sit.project221.oasipbackend.entities.Event;
 import sit.project221.oasipbackend.repositories.EventRepository;
 import sit.project221.oasipbackend.utils.ListMapper;
 
+import java.io.ObjectInputValidation;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -95,6 +97,17 @@ public class EventService {
         event.setEventNote(updateEvent.getEventNote());
         eventRepository.saveAndFlush(event);
         return updateEvent;
+    }
+
+    public List<GetEventDTO> getEventByCategory (Integer id){
+        ArrayList<Event> filterEventList = new ArrayList<>();
+        List<Event> eventList = eventRepository.findAllByOrderByEventStartTimeDesc();
+        for(Event event : eventList){
+            if(event.getEventCategoryId().getId() == id){
+                filterEventList.add(event);
+            }
+        }
+        return listMapper.mapList(filterEventList, GetEventDTO.class, modelMapper);
     }
 }
 
