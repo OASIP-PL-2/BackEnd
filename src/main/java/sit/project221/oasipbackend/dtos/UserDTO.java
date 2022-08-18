@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import sit.project221.oasipbackend.utils.Roles;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,10 +17,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddUserDTO {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class UserDTO {
     @NotEmpty
     @NotBlank(message="name can not be blank")
     @Size(max = 100, message = "name must not be more than 100 characters")
@@ -29,5 +27,5 @@ public class AddUserDTO {
     @NotNull(message = "Email cannot be Null")
     @Size(max = 50, message = "email must not be more than 50 characters")
     private String email;
-    private String role;
+    private Roles role;
 }

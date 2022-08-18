@@ -3,9 +3,9 @@ package sit.project221.oasipbackend.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import sit.project221.oasipbackend.dtos.AddUserDTO;
+import sit.project221.oasipbackend.dtos.GetDetailUserDTO;
+import sit.project221.oasipbackend.dtos.UserDTO;
 import sit.project221.oasipbackend.dtos.GetAllUserDTO;
-import sit.project221.oasipbackend.dtos.UpdateUserDTO;
 import sit.project221.oasipbackend.entities.User;
 import sit.project221.oasipbackend.services.UserService;
 
@@ -26,13 +26,13 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public GetAllUserDTO getUserById(@PathVariable Integer id) {
+    public GetDetailUserDTO getUserById(@PathVariable Integer id) {
         return userService.getUserById(id);
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
-    public User create(@Valid @RequestBody AddUserDTO newUser) {
+    public User create(@Valid @RequestBody UserDTO newUser) {
         return userService.AddUser(newUser);
     }
 
@@ -42,7 +42,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public UpdateUserDTO update(@Valid @RequestBody UpdateUserDTO updateUser, @PathVariable Integer id) {
+    public UserDTO update(@Valid @RequestBody UserDTO updateUser, @PathVariable Integer id) {
         return userService.updateUser(updateUser , id);
     }
 

@@ -5,13 +5,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import sit.project221.oasipbackend.dtos.AddUserDTO;
+import sit.project221.oasipbackend.dtos.GetDetailUserDTO;
+import sit.project221.oasipbackend.dtos.UserDTO;
 import sit.project221.oasipbackend.dtos.GetAllUserDTO;
-import sit.project221.oasipbackend.dtos.UpdateUserDTO;
 import sit.project221.oasipbackend.entities.User;
 import sit.project221.oasipbackend.repositories.UserRepository;
 import sit.project221.oasipbackend.utils.ListMapper;
+import sit.project221.oasipbackend.utils.Roles;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service()
@@ -28,30 +30,26 @@ public class UserService {
         return listMapper.mapList(users, GetAllUserDTO.class, modelMapper);
     }
 
-    public GetAllUserDTO getUserById(Integer id){
+    public GetDetailUserDTO getUserById(Integer id){
         User user = userRepository.findById(id)
                 .orElseThrow(()->new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "User id "+ id+
                         "Does Not Exist !!!"
                 ));
-        return modelMapper.map(user, GetAllUserDTO.class);
+        return modelMapper.map(user, GetDetailUserDTO.class);
     }
 
-    public User AddUser(AddUserDTO newUser){
+    public User AddUser(UserDTO newUser){
         User addUserList = modelMapper.map(newUser, User.class);
-        if(newUser.getRole().equals(Role.admin) || newUser.getRole().equals(Role.lecturer) || newUser.getRole().equals(Role.student)){
-            return userRepository.saveAndFlush(addUserList);
-        }else{
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST , "Role is not define");
-        }
+        addUserList.setRole(newUser.getRole() == null ? Roles.student : newUser.getRole());
+        return userRepository.saveAndFlush(addUserList);
     }
-    public UpdateUserDTO updateUser(UpdateUserDTO updateUser, Integer id){
+    public UserDTO updateUser(UserDTO updateUser, Integer id){
         User user = userRepository.findById(id).orElseThrow(()->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, id + "does not exist!!!"));
-
         user.setName(updateUser.getName());
         user.setEmail(updateUser.getEmail());
-        user.setRole(updateUser.getRole());
+        user.setRole((updateUser.getRole() == null) ? user.getRole() : updateUser.getRole());
         userRepository.saveAndFlush(user);
         return updateUser;
     }
@@ -63,7 +61,8 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    public enum Role {
-        admin, lecturer, student;
+    public boolean checkRoles (Roles role){
+        return Arrays.stream(Roles.values()).equals(role);
     }
+
 }

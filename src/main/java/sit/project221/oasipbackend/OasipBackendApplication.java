@@ -12,8 +12,6 @@ public class OasipBackendApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(OasipBackendApplication.class, args);
-
     }
-
 
 }
