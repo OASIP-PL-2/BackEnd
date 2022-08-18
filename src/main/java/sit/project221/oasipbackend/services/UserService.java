@@ -41,16 +41,22 @@ public class UserService {
 
     public User AddUser(UserDTO newUser){
         User addUserList = modelMapper.map(newUser, User.class);
-        addUserList.setRole(newUser.getRole() == null ? Roles.student : newUser.getRole());
+        addUserList.setName(newUser.getName().trim());
+        addUserList.setEmail(newUser.getEmail().trim());
+        if(checkUnique(newUser , 0)){
+            addUserList.setRole(newUser.getRole() == null ? Roles.student : newUser.getRole());
+        }
         return userRepository.saveAndFlush(addUserList);
     }
     public UserDTO updateUser(UserDTO updateUser, Integer id){
         User user = userRepository.findById(id).orElseThrow(()->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, id + "does not exist!!!"));
-        user.setName(updateUser.getName());
-        user.setEmail(updateUser.getEmail());
-        user.setRole((updateUser.getRole() == null) ? user.getRole() : updateUser.getRole());
-        userRepository.saveAndFlush(user);
+        if(checkUnique(updateUser , id)){
+            user.setName(updateUser.getName().trim());
+            user.setEmail(updateUser.getEmail().trim());
+            user.setRole((updateUser.getRole() == null) ? user.getRole() : updateUser.getRole());
+            userRepository.saveAndFlush(user);
+        }
         return updateUser;
     }
 
@@ -61,8 +67,18 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    public boolean checkRoles (Roles role){
-        return Arrays.stream(Roles.values()).equals(role);
+    public boolean checkUnique (UserDTO user ,Integer id){
+        List<User> allUser = userRepository.findAll();
+        for(User users : allUser){
+            if(!(users.getId() == id)){
+                if(users.getName().trim().equals(user.getName().trim())){
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST , "This name is already used");
+                }else if (users.getEmail().trim().equals(user.getEmail().trim())){
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST , "This email is already used");
+                }
+            }
+        }
+        return true;
     }
 
 }
