@@ -30,7 +30,7 @@ public class User {
     @Column(name = "createdOn", nullable = false , insertable = false)
     private LocalDateTime createdOn;
 
-    @Column(name = "updateOn", nullable = false , insertable = false , updatable = false)
-    private LocalDateTime updateOn;
+    @Column(name = "updatedOn", nullable = false , insertable = false , updatable = false)
+    private LocalDateTime updatedOn;
 
 }

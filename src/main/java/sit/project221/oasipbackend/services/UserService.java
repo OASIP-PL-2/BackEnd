@@ -73,7 +73,7 @@ public class UserService {
             if(!(users.getId() == id)){
                 if(users.getName().trim().equals(user.getName().trim())){
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST , "This name is already used");
-                }else if (users.getEmail().trim().equals(user.getEmail().trim())){
+                }if (users.getEmail().trim().equals(user.getEmail().trim())){
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST , "This email is already used");
                 }
             }

@@ -21,5 +21,5 @@ public class GetDetailUserDTO {
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdOn;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime updateOn;
+    private LocalDateTime updatedOn;
 }
