@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import sit.project221.oasipbackend.dtos.GetDetailUserDTO;
 import sit.project221.oasipbackend.dtos.UserDTO;
 import sit.project221.oasipbackend.dtos.GetAllUserDTO;
+import sit.project221.oasipbackend.dtos.UserLoginDTO;
 import sit.project221.oasipbackend.entities.User;
 import sit.project221.oasipbackend.services.UserService;
 
@@ -46,4 +47,6 @@ public class UserController {
         return userService.updateUser(updateUser , id);
     }
 
+    @PostMapping("/match")
+    public UserLoginDTO Login(@Valid @RequestBody UserLoginDTO user){return userService.Login(user);}
 }

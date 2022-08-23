@@ -27,6 +27,9 @@ public class User {
     @Column(name = "role", nullable = false)
     private Roles role;
 
+    @Column(name = "password" , nullable = false , length = 14)
+    private String password;
+
     @Column(name = "createdOn", nullable = false , insertable = false)
     private LocalDateTime createdOn;
 

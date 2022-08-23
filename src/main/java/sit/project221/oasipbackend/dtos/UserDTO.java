@@ -28,4 +28,5 @@ public class UserDTO {
     @Size(max = 50, message = "email must not be more than 50 characters")
     private String email;
     private Roles role;
+    private String password;
 }

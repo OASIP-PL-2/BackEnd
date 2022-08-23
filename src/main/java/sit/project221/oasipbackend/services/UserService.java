@@ -3,11 +3,13 @@ package sit.project221.oasipbackend.services;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import sit.project221.oasipbackend.dtos.GetDetailUserDTO;
 import sit.project221.oasipbackend.dtos.UserDTO;
 import sit.project221.oasipbackend.dtos.GetAllUserDTO;
+import sit.project221.oasipbackend.dtos.UserLoginDTO;
 import sit.project221.oasipbackend.entities.User;
 import sit.project221.oasipbackend.repositories.UserRepository;
 import sit.project221.oasipbackend.utils.ListMapper;
@@ -24,6 +26,9 @@ public class UserService {
     private ModelMapper modelMapper;
     @Autowired
     private ListMapper listMapper;
+
+    @Autowired
+    private Argon2PasswordEncoder argon2PasswordEncoder;
 
     public List<GetAllUserDTO> getAllUser(){
         List<User> users = userRepository.findAllByOrderByNameAsc();
@@ -46,6 +51,7 @@ public class UserService {
         if(checkUnique(newUser , 0)){
             addUserList.setRole(newUser.getRole() == null ? Roles.student : newUser.getRole());
         }
+        addUserList.setPassword(argon2PasswordEncoder.encode(addUserList.getPassword()));
         return userRepository.saveAndFlush(addUserList);
     }
     public UserDTO updateUser(UserDTO updateUser, Integer id){
@@ -79,6 +85,19 @@ public class UserService {
             }
         }
         return true;
+    }
+
+    public UserLoginDTO Login (UserLoginDTO user){
+        if(userRepository.existsByEmail(user.getEmail())) {
+            User users = userRepository.findByEmail(user.getEmail());
+            if(argon2PasswordEncoder.matches(user.getPassword() , users.getPassword())){
+                throw new ResponseStatusException(HttpStatus.OK , "Password Matched");
+            }else{
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED , "Password NOT Matched");
+            }
+        }else{
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "A user woth the specified email DOES NOT exist");
+        }
     }
 
 }

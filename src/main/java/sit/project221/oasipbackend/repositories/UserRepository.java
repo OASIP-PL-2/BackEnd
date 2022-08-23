@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findAllByOrderByNameAsc();
+    public User findByEmail(String email);
+    public boolean existsByEmail(String email);
 }
