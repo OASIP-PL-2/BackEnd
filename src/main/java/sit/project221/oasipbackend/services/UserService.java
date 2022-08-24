@@ -61,6 +61,8 @@ public class UserService {
             user.setName(updateUser.getName().trim());
             user.setEmail(updateUser.getEmail().trim());
             user.setRole((updateUser.getRole() == null) ? user.getRole() : updateUser.getRole());
+//            user.setPassword((updateUser.getPassword() == null)? user.getPassword() : updateUser.getPassword());
+            user.setPassword(user.getPassword());
             userRepository.saveAndFlush(user);
         }
         return updateUser;

@@ -46,7 +46,4 @@ public class UserController {
     public UserDTO update(@Valid @RequestBody UserDTO updateUser, @PathVariable Integer id) {
         return userService.updateUser(updateUser , id);
     }
-
-    @PostMapping("/match")
-    public UserLoginDTO Login(@Valid @RequestBody UserLoginDTO user){return userService.Login(user);}
 }
