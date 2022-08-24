@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.yaml.snakeyaml.util.EnumUtils;
 import sit.project221.oasipbackend.dtos.GetDetailUserDTO;
 import sit.project221.oasipbackend.dtos.UserDTO;
 import sit.project221.oasipbackend.dtos.GetAllUserDTO;
@@ -98,7 +99,7 @@ public class UserService {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED , "Password NOT Matched");
             }
         }else{
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "A user woth the specified email DOES NOT exist");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "A user with the specified email DOES NOT exist");
         }
     }
 
