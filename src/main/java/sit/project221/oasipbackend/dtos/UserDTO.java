@@ -27,6 +27,6 @@ public class UserDTO {
     @NotNull(message = "Email cannot be Null")
     @Size(max = 50, message = "email must not be more than 50 characters")
     private String email;
-    private Roles role;
+    private String role;
     private String password;
 }

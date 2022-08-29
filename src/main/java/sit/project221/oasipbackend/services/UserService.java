@@ -50,7 +50,11 @@ public class UserService {
         addUserList.setName(newUser.getName().trim());
         addUserList.setEmail(newUser.getEmail().trim());
         if(checkUnique(newUser , 0)){
-            addUserList.setRole(newUser.getRole() == null ? Roles.student : newUser.getRole());
+            addUserList.setRole(newUser.getRole() == null || newUser.getRole() == "" ? Roles.student.toString() : newUser.getRole());
+//            user.setRole(updateUser.getRole()==null||updateUser.getRole()==""?Roles.student.toString():updateUser.getRole());
+//            if(!checkRole(addUserList.getRole())) {
+//                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Don't have this role");
+//            }
         }
         addUserList.setPassword(argon2PasswordEncoder.encode(addUserList.getPassword()));
         return userRepository.saveAndFlush(addUserList);
@@ -88,6 +92,19 @@ public class UserService {
             }
         }
         return true;
+    }
+
+    private boolean checkRole(String newRole) {
+        boolean existRole = false;
+        for (Roles role : Roles.values()){
+            System.out.println(role.toString());
+//                if(newRole==null||(newRole.equals(role.toString())||newRole=="")) {
+            if(role.toString().equals(newRole) || newRole==null || newRole=="") {
+                return true;
+            }
+        }
+        return false;
+//        return existRole;
     }
 
     public UserLoginDTO Login (UserLoginDTO user){

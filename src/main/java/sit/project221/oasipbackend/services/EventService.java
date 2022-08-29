@@ -1,5 +1,6 @@
 package sit.project221.oasipbackend.services;
 
+import lombok.val;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,7 +14,9 @@ import sit.project221.oasipbackend.repositories.EventRepository;
 import sit.project221.oasipbackend.utils.ListMapper;
 
 import java.io.ObjectInputValidation;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -108,6 +111,30 @@ public class EventService {
             }
         }
         return listMapper.mapList(filterEventList, GetEventDTO.class, modelMapper);
+    }
+
+    public List<GetEventDTO> getPastEvent(){
+        LocalDateTime currentDateTime;
+        currentDateTime = LocalDateTime.now();
+        List<Event> eventList = eventRepository.findPastEvent(currentDateTime);
+        return listMapper.mapList(eventList, GetEventDTO.class, modelMapper);
+    }
+    public List<GetEventDTO> getFutureEvent(){
+        LocalDateTime currentDateTime;
+        currentDateTime = LocalDateTime.now();
+        List<Event> eventList = eventRepository.findFutureEvent(currentDateTime);
+        return listMapper.mapList(eventList, GetEventDTO.class, modelMapper);
+    }
+
+    public List<GetEventDTO> getEventsByDate(Integer date){
+        val formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        val dateTime = LocalDate.parse(date.toString(),formatter);
+        LocalDateTime startTime = LocalDateTime.of(dateTime.getYear(), dateTime.getMonth(), dateTime.getDayOfMonth(), 00, 00, 00);
+        LocalDateTime endTime = LocalDateTime.of(dateTime.getYear(), dateTime.getMonth(), dateTime.getDayOfMonth(), 23, 59, 59);
+//        LocalDateTime startTime = LocalDateTime.of(2022, Month.AUGUST, 20, 00, 00, 00);
+//        LocalDateTime endTime = LocalDateTime.of(2022, Month.AUGUST, 20, 23, 59, 59);
+        List<Event> eventList = eventRepository.findEventsByDate(startTime,endTime);
+        return listMapper.mapList(eventList, GetEventDTO.class, modelMapper);
     }
 }
 

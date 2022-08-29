@@ -13,6 +13,7 @@ import java.util.List;
 public interface EventCategoryRepository extends JpaRepository<EventCategory, Integer> {
     public List<EventCategory> findAllByOrderByIdDesc();
 
+
 //    @Modifying
 //    @Query(value = "insert into eventCategory (eventCategoryName , eventDuration) VALUES (:CategoryName,:Duration)", nativeQuery = true)
 //    @Transactional

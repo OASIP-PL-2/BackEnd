@@ -23,9 +23,10 @@ public class User {
     @Column(name = "email", nullable = false, length = 50)
     private String email;
 
-    @Enumerated(EnumType.STRING)
+//    @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
-    private Roles role;
+    private String role;
+//    private Roles role;
 
     @Column(name = "password" , nullable = false , length = 14)
     private String password;

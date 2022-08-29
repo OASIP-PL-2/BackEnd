@@ -19,5 +19,5 @@ public class GetAllUserDTO {
     private Integer id;
     private String name;
     private String email;
-    private Roles role;
+    private String role;
 }

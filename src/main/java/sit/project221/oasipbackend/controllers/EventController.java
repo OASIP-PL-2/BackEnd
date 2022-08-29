@@ -19,7 +19,6 @@ public class EventController {
     @Autowired
     private EventService eventService;
 
-
     @GetMapping("")
     public List<GetEventDTO> getAllEvent() {
         return eventService.getAllEvent();
@@ -48,5 +47,20 @@ public class EventController {
     @PutMapping("/{bookingId}")
     public UpdateEventDTO update(@Valid @RequestBody UpdateEventDTO updateEvent, @PathVariable Integer bookingId) {
         return eventService.updateEvent(updateEvent, bookingId);
+    }
+
+    @GetMapping("/past")
+    public List<GetEventDTO> getPastEvent() {
+        return eventService.getPastEvent();
+    }
+
+    @GetMapping("/future")
+    public List<GetEventDTO> getFutureEvent() {
+        return eventService.getFutureEvent();
+    }
+
+    @GetMapping("/date/{date}")
+    public List<GetEventDTO> getEventsByDate(@PathVariable Integer date) {
+        return eventService.getEventsByDate(date);
     }
 }
