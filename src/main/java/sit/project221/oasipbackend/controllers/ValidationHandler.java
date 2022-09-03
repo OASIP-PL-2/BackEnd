@@ -34,15 +34,15 @@ public class ValidationHandler extends ResponseEntityExceptionHandler{
         return new ResponseEntity<Object>(errors, HttpStatus.BAD_REQUEST);
     }
 
-    public static ResponseEntity<Object> showError(String fieldName, String message) {
+    public static ResponseEntity<Object> showError(HttpStatus status, String message) {
         Map<String, Object> errors = new HashMap<>();
         errors.put("TIMESTAMP", Instant.now());
-        errors.put("status", HttpStatus.BAD_REQUEST.value());
-        errors.put("message", "Validate failed!");
+        errors.put("status", status.value());
+        errors.put("message", message);
 
-        Map<String, String> errorDetails = new HashMap<>();
-        errorDetails.put(fieldName, message);
-        errors.put("errorDetails",errorDetails);
-        return new ResponseEntity<Object>(errors, HttpStatus.BAD_REQUEST);
+//        Map<String, String> errorDetails = new HashMap<>();
+//        errorDetails.put(fieldName, message);
+//        errors.put("errorDetails",errorDetails);
+        return new ResponseEntity<Object>(errors, status);
     }
 }

@@ -45,7 +45,7 @@ public class EventCategoryService {
 
         for(EventCategory category:eventCategory) {
             if (category.getEventCategoryName().toLowerCase().trim().equals(updateEventCategory.getEventCategoryName().toLowerCase().trim())) {
-                return ValidationHandler.showError("eventCategoryName", "EventCategoryName must be unique");
+                return ValidationHandler.showError(HttpStatus.BAD_REQUEST, "EventCategoryName must be unique");
             }
         }
         updateCategory.setEventCategoryName(updateEventCategory.getEventCategoryName().trim());

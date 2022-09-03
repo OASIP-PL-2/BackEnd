@@ -17,7 +17,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-
     @Autowired
     private UserService userService;
 
@@ -33,7 +32,7 @@ public class UserController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
-    public User create(@Valid @RequestBody UserDTO newUser) {
+    public Object create(@Valid @RequestBody UserDTO newUser) {
         return userService.AddUser(newUser);
     }
 
@@ -43,7 +42,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public UserDTO update(@Valid @RequestBody UserDTO updateUser, @PathVariable Integer id) {
+    public Object update(@Valid @RequestBody UserDTO updateUser, @PathVariable Integer id) {
         return userService.updateUser(updateUser , id);
     }
 }
