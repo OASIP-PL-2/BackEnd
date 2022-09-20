@@ -2,8 +2,6 @@ package sit.project221.oasipbackend.models;
 
 import lombok.*;
 
-import java.io.Serializable;
-
 @Setter
 @Getter
 @AllArgsConstructor

@@ -8,6 +8,9 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import sit.project221.oasipbackend.config.JwtAuthenticationEntryPoint;
 import sit.project221.oasipbackend.utils.ListMapper;
 
@@ -30,17 +33,14 @@ public class ApplicationConfig {
     public Argon2PasswordEncoder argon2PasswordEncoder() {return new Argon2PasswordEncoder(16,29,2,16,2);}
 
 //    @Bean
-//    @Qualifier("defaultAuthentication")
-//    public Authentication getAuthentication() {
-//        return SecurityContextHolder.getContext().getAuthentication();
-//    }
-//    @Bean
-//    public JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint() {
-//        return new JwtAuthenticationEntryPoint();
+//    public WebMvcConfigurer corsConfigurer() {
+//        return new WebMvcConfigurerAdapter() {
+//            @Override
+//            public void addCorsMappings(CorsRegistry registry) {
+//                registry.addMapping("/**").allowedMethods("GET", "POST", "PUT", "DELETE").allowedOrigins("*")
+//                        .allowedHeaders("*");
+//            }
+//        };
 //    }
 
-//    @Bean
-//    public UserDetailsService userDetailsService() {
-//        return
-//    }
 }
