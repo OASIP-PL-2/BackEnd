@@ -178,7 +178,10 @@ public class UserService {
 
                 final String token = jwtTokenUtil.generateToken(userDetails);
 
-                return ResponseEntity.ok(new JwtResponse(token, user.getId(), user.getName(), user.getEmail(), user.getRole()));
+                final String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
+                return ResponseEntity.ok(new JwtResponse("Login Success",token,refreshToken));
+
+//                return ResponseEntity.ok(new JwtResponse(token, user.getId(), user.getName(), user.getEmail(), user.getRole()));
 //                throw new ResponseStatusException(HttpStatus.OK, "Password Matched");
             } else {
                 return ValidationHandler.showError(HttpStatus.UNAUTHORIZED, "Password NOT Matched");
