@@ -106,10 +106,11 @@ public class UserService {
     }
 
     public void deleteUser(Integer id){
-        userRepository.findById(id).orElseThrow(()->
+        User user = userRepository.findById(id).orElseThrow(()->
                 new ResponseStatusException(HttpStatus.NOT_FOUND,
                         id + " does not exist !!!"));
-        userRepository.deleteById(id);
+//        userRepository.deleteById(id);
+        userRepository.delete(user);
     }
 
 //    public boolean checkUnique (UserDTO user ,Integer id){
@@ -177,9 +178,10 @@ public class UserService {
                         .loadUserByUsername(userLogin.getEmail());
 
                 final String token = jwtTokenUtil.generateToken(userDetails);
-
                 final String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
-                return ResponseEntity.ok(new JwtResponse("Login Success",token,refreshToken));
+
+                GetAllUserDTO userResponse = modelMapper.map(user, GetAllUserDTO.class);
+                return ResponseEntity.ok(new JwtResponse("Login Success", token, refreshToken, userResponse));
 
 //                return ResponseEntity.ok(new JwtResponse(token, user.getId(), user.getName(), user.getEmail(), user.getRole()));
 //                throw new ResponseStatusException(HttpStatus.OK, "Password Matched");

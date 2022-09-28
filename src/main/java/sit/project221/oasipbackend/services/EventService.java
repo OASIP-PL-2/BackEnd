@@ -6,14 +6,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import sit.project221.oasipbackend.config.JwtTokenUtil;
 import sit.project221.oasipbackend.dtos.AddEventDTO;
 import sit.project221.oasipbackend.dtos.GetEventDTO;
 import sit.project221.oasipbackend.dtos.UpdateEventDTO;
 import sit.project221.oasipbackend.entities.Event;
+import sit.project221.oasipbackend.entities.User;
 import sit.project221.oasipbackend.repositories.EventRepository;
+import sit.project221.oasipbackend.repositories.UserRepository;
 import sit.project221.oasipbackend.utils.ListMapper;
 
-import java.io.ObjectInputValidation;
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -25,13 +28,31 @@ import java.util.List;
 public class EventService {
     @Autowired
     private EventRepository eventRepository;
+
+    @Autowired
+    private UserRepository userRepository;
     @Autowired
     private ModelMapper modelMapper;
     @Autowired
     private ListMapper listMapper;
 
+    private final JwtTokenUtil jwtTokenUtill;
+    private final JwtUserDetailsService jwtUserDetailsService;
 
-    public List<GetEventDTO> getAllEvent(){
+    public EventService(JwtTokenUtil jwtTokenUtill, JwtUserDetailsService jwtUserDetailsService) {
+        this.jwtTokenUtill = jwtTokenUtill;
+        this.jwtUserDetailsService = jwtUserDetailsService;
+    }
+
+    public User getUserFromRequest(HttpServletRequest request) {
+        String requestToken = request.getHeader("Authorization").substring(7);
+        String userEmail = jwtTokenUtill.getUsernameFromToken(requestToken);
+        return  userRepository.findByEmail(userEmail);
+    }
+
+    public List<GetEventDTO> getAllEvent(HttpServletRequest request){
+        User user = getUserFromRequest(request);
+        System.out.println(user.getEmail());
         List<Event> eventList = eventRepository.findAllByOrderByEventStartTimeDesc();
         return listMapper.mapList(eventList, GetEventDTO.class, modelMapper);
     }

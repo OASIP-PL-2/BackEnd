@@ -1,7 +1,6 @@
 package sit.project221.oasipbackend.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,59 +14,80 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import sit.project221.oasipbackend.config.JwtAuthenticationEntryPoint;
+import sit.project221.oasipbackend.CustomException.CustomAccessDeniedHandler;
 
-@Configuration
-@EnableWebSecurity
+@Configuration @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-@EnableAutoConfiguration
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final UserDetailsService jwtUserDetailsService;
+
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+
+    private final JwtRequestFilter jwtRequestFilter;
+
+    private final Argon2PasswordEncoder argon2PasswordEncoder;
 
     @Autowired
-    private UserDetailsService jwtUserDetailsService;
-
-    @Autowired
-    private JwtRequestFilter jwtRequestFilter;
+    public WebSecurityConfig(UserDetailsService jwtUserDetailsService, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint, JwtRequestFilter jwtRequestFilter, Argon2PasswordEncoder argon2PasswordEncoder) {
+        this.jwtUserDetailsService = jwtUserDetailsService;
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+        this.jwtRequestFilter = jwtRequestFilter;
+        this.argon2PasswordEncoder = argon2PasswordEncoder;
+    }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        // configure AuthenticationManager so that it knows from where to load
-        // user for matching credentials
-        // Use BCryptPasswordEncoder
-        auth.userDetailsService(jwtUserDetailsService).passwordEncoder(argon2PasswordEncoder());
+        auth.userDetailsService(jwtUserDetailsService).passwordEncoder(argon2PasswordEncoder);
     }
 
-    @Bean
     @Override
+    protected void configure(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity.cors().and().csrf().disable()
+                .exceptionHandling().authenticationEntryPoint(new JwtAuthenticationEntryPoint())
+                .accessDeniedHandler(accessDeniedHandler())
+                .and()
+//                .exceptionHandling().accessDeniedHandler(new JwtAccessDenied()).and()
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+                .authorizeRequests().antMatchers(HttpMethod.POST, "/api/login", "/api/users").permitAll()
+                .antMatchers("/api/users/**","/api/match/**").hasRole("admin")
+//                .antMatchers("/api/events/**").hasRole("student")
+                .antMatchers("/api/events/**").access("hasRole('admin') or hasRole('student')")
+//                .antMatchers("/api/refresh").permitAll()
+                .anyRequest().authenticated();
+        httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+//
+//        //method we'll configure patterns to define protected/unprotected API endpoints. Please note that we have disabled CSRF protection because we are not using Cookies.
+//
+//
+//        // We don't need CSRF for this example
+//        httpSecurity.csrf().disable().cors().disable()
+//                // dont authenticate this particular request
+//                .authorizeRequests().antMatchers("/api/login").permitAll()
+//                .antMatchers("/api/users/signup").permitAll() //user sign
+//                // all other requests need to be authenticated
+//                .anyRequest().authenticated().and().sessionManagement().
+//                sessionCreationPolicy(SessionCreationPolicy.STATELESS).
+//                and().exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint);
+//                // make sure we use stateless session; session won't be used to
+//                // store user's state.
+////                        exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
+////                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+//
+//        // Add a filter to validate the tokens with every request
+//        httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+    }
+
+    @Override @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
 
     @Bean
-    public Argon2PasswordEncoder argon2PasswordEncoder(){
-        return new Argon2PasswordEncoder(16,29,1,16,2);
+    public AccessDeniedHandler accessDeniedHandler(){
+        return new CustomAccessDeniedHandler();
     }
 
-    @Override
-    protected void configure(HttpSecurity httpSecurity) throws Exception {
-        // We don't need CSRF for this example
-//        httpSecurity.csrf().disable()
-        httpSecurity.cors().and().csrf().disable()
-                // dont authenticate this particular request
-                //  การดักเข้าได้เฉพาะ login
-                .authorizeRequests().antMatchers(HttpMethod.POST,"/api/login","/api/users").permitAll().
-                // all other requests need to be authenticated
-                        anyRequest().authenticated().and().
-                // make sure we use stateless session; session won't be used to
-                // store user's state.
-                        exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
-        // Add a filter to validate the tokens with every request
-        httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-    }
 }

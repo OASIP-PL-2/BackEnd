@@ -8,7 +8,9 @@ import sit.project221.oasipbackend.dtos.GetEventDTO;
 import sit.project221.oasipbackend.dtos.UpdateEventDTO;
 import sit.project221.oasipbackend.entities.Event;
 import sit.project221.oasipbackend.services.EventService;
+import sit.project221.oasipbackend.services.RefreshService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -20,8 +22,8 @@ public class EventController {
     private EventService eventService;
 
     @GetMapping("")
-    public List<GetEventDTO> getAllEvent() {
-        return eventService.getAllEvent();
+    public List<GetEventDTO> getAllEvent(@Valid HttpServletRequest request) {
+        return eventService.getAllEvent(request);
     }
 
     @GetMapping("/{bookingId}")

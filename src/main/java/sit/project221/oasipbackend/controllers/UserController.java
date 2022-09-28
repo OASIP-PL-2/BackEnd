@@ -10,16 +10,20 @@ import sit.project221.oasipbackend.dtos.UserLoginDTO;
 import sit.project221.oasipbackend.entities.User;
 import sit.project221.oasipbackend.services.UserService;
 
+import javax.annotation.security.DeclareRoles;
+import javax.annotation.security.RolesAllowed;
 import javax.validation.Valid;
 import java.util.List;
 
 @CrossOrigin
 @RestController
+//@DeclareRoles({"admin", "student", "lecture"})
 @RequestMapping("/api/users")
 public class UserController {
     @Autowired
     private UserService userService;
 
+    @RolesAllowed("admin")
     @GetMapping("")
     public List<GetAllUserDTO> getAllUser() {
         return userService.getAllUser();
