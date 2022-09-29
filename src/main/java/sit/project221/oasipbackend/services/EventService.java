@@ -5,8 +5,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.server.ResponseStatusException;
 import sit.project221.oasipbackend.config.JwtTokenUtil;
+import sit.project221.oasipbackend.controllers.ValidationHandler;
 import sit.project221.oasipbackend.dtos.AddEventDTO;
 import sit.project221.oasipbackend.dtos.GetEventDTO;
 import sit.project221.oasipbackend.dtos.UpdateEventDTO;
@@ -45,33 +47,57 @@ public class EventService {
     }
 
     public User getUserFromRequest(HttpServletRequest request) {
-        String requestToken = request.getHeader("Authorization").substring(7);
-        String userEmail = jwtTokenUtill.getUsernameFromToken(requestToken);
+        String token = request.getHeader("Authorization").substring(7);
+        String userEmail = jwtTokenUtill.getUsernameFromToken(token);
         return  userRepository.findByEmail(userEmail);
     }
 
     public List<GetEventDTO> getAllEvent(HttpServletRequest request){
-        User user = getUserFromRequest(request);
-        System.out.println(user.getEmail());
-        List<Event> eventList = eventRepository.findAllByOrderByEventStartTimeDesc();
+        User userOwner = getUserFromRequest(request);
+        System.out.println(userOwner.getEmail());
+        List<Event> eventList = new ArrayList<>();
+
+        if (userOwner.getRole().equals("admin")){
+            System.out.println("เข้า admin");
+            eventList = eventRepository.findAllByOrderByEventStartTimeDesc();
+        } else if (userOwner.getRole().equals("student")) {
+            System.out.println("เข้า student");
+            eventList = eventRepository.findAllByOwner(userOwner.getEmail());
+        }
         return listMapper.mapList(eventList, GetEventDTO.class, modelMapper);
     }
 
-    public GetEventDTO getEventById(Integer bookingId){
+    public Object getEventById(HttpServletRequest request, Integer bookingId){
+        User userOwner = getUserFromRequest(request);
         Event event = eventRepository.findById(bookingId)
                 .orElseThrow(()->new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Customer id "+ bookingId+
                         "Does Not Exist !!!"
                 ));
+        
+        if (userOwner.getRole().equals("student")) {
+            if (!userOwner.getEmail().equals(event.getBookingEmail())) {
+                return ValidationHandler.showError(HttpStatus.FORBIDDEN, "You not have permission this event");
+            }
+
+        }
+
         return modelMapper.map(event, GetEventDTO.class);
     }
 
-    public Event addEvent(AddEventDTO newEvent){
+    public Object addEvent(HttpServletRequest request, AddEventDTO newEvent){
+        User userOwner = getUserFromRequest(request);
+
+        if (userOwner.getRole().equals("student")) {
+            if (!userOwner.getEmail().equals(newEvent.getBookingEmail())) {
+                return ValidationHandler.showError(HttpStatus.BAD_REQUEST, "the booking email must be the same as student's email");
+            }
+        }
+
         Event addEventList = modelMapper.map(newEvent, Event.class);
         List<Event> eventList = eventRepository.findEventByEventCategoryIdEquals(addEventList.getEventCategoryId());
         checkTimeOverLap(newEvent.getEventStartTime(), newEvent.getEventDuration(),eventList );
         return eventRepository.saveAndFlush(addEventList);
-
     }
 
     private void checkTimeOverLap(LocalDateTime updateDateTime, Integer newEventDuration, List<Event> eventList) {
@@ -97,16 +123,35 @@ public class EventService {
         return getEventEndTime;
     }
 
-    public void deleteEvent(Integer bookingId){
-        eventRepository.findById(bookingId).orElseThrow(()->
+    public Object deleteEvent(HttpServletRequest request, Integer bookingId){
+        User userOwner = getUserFromRequest(request);
+        Event event = eventRepository.findById(bookingId).orElseThrow(()->
                 new ResponseStatusException(HttpStatus.NOT_FOUND,
                         bookingId + " does not exist !!!"));
+
+        if (userOwner.getRole().equals("student")) {
+            if (!userOwner.getEmail().equals(event.getBookingEmail())) {
+                return ValidationHandler.showError(HttpStatus.FORBIDDEN, "You not have permission this event");
+            }
+
+        }
+
         eventRepository.deleteById(bookingId);
+        return event;
     }
 
-    public UpdateEventDTO updateEvent(UpdateEventDTO updateEvent, Integer bookingId){
+    public Object updateEvent(HttpServletRequest request, UpdateEventDTO updateEvent, Integer bookingId){
+        User userOwner = getUserFromRequest(request);
         Event event = eventRepository.findById(bookingId).orElseThrow(()->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, bookingId + "does not exist!!!"));
+                new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        bookingId + " does not exist !!!"));
+
+        if (userOwner.getRole().equals("student")) {
+            if (!userOwner.getEmail().equals(event.getBookingEmail())) {
+                return ValidationHandler.showError(HttpStatus.FORBIDDEN, "You not have permission this event");
+            }
+
+        }
 
         Event updateEventList = modelMapper.map(updateEvent, Event.class);
         List<Event> eventList = eventRepository.findEventByEventCategoryIdEquals(updateEventList.getEventCategoryId());
@@ -119,6 +164,7 @@ public class EventService {
 
         event.setEventStartTime(updateEvent.getEventStartTime());
         event.setEventNote(updateEvent.getEventNote());
+        event.setEventCategoryId(updateEventList.getEventCategoryId());
         eventRepository.saveAndFlush(event);
         return updateEvent;
     }

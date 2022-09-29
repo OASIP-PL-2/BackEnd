@@ -27,8 +27,8 @@ public class EventController {
     }
 
     @GetMapping("/{bookingId}")
-    public GetEventDTO getById(@PathVariable Integer bookingId) {
-        return eventService.getEventById(bookingId);
+    public Object getById(@Valid HttpServletRequest request, @PathVariable Integer bookingId) {
+        return eventService.getEventById(request, bookingId);
     }
 
     //Category ID
@@ -37,18 +37,18 @@ public class EventController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
-    public Event create(@Valid @RequestBody AddEventDTO newEvent) {
-        return eventService.addEvent(newEvent);
+    public Object create(@Valid HttpServletRequest request, @Valid @RequestBody AddEventDTO newEvent) {
+        return eventService.addEvent(request, newEvent);
     }
 
     @DeleteMapping("/{bookingId}")
-    public void delete(@PathVariable Integer bookingId) {
-        eventService.deleteEvent(bookingId);
+    public Object delete(@Valid HttpServletRequest request, @PathVariable Integer bookingId) {
+        return eventService.deleteEvent(request, bookingId);
     }
 
     @PutMapping("/{bookingId}")
-    public UpdateEventDTO update(@Valid @RequestBody UpdateEventDTO updateEvent, @PathVariable Integer bookingId) {
-        return eventService.updateEvent(updateEvent, bookingId);
+    public Object update(@Valid HttpServletRequest request, @Valid @RequestBody UpdateEventDTO updateEvent, @PathVariable Integer bookingId) {
+        return eventService.updateEvent(request, updateEvent, bookingId);
     }
 
     @GetMapping("/past")
