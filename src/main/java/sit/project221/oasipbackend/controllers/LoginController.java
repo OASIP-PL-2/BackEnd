@@ -7,26 +7,21 @@ import org.springframework.web.bind.annotation.*;
 import sit.project221.oasipbackend.config.JwtTokenUtil;
 import sit.project221.oasipbackend.dtos.UserLoginDTO;
 import sit.project221.oasipbackend.services.JwtUserDetailsService;
+import sit.project221.oasipbackend.services.LoginService;
 import sit.project221.oasipbackend.services.UserService;
 
 import javax.validation.Valid;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/api/login")
+@RequestMapping("/api")
 public class LoginController {
     @Autowired
-    private UserService userService;
+    private LoginService loginService;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    @PostMapping("/match")
+    public ResponseEntity Match(@Valid @RequestBody UserLoginDTO user) throws Exception {return loginService.match(user);}
 
-    @Autowired
-    private JwtTokenUtil jwtTokenUtil;
-
-    @Autowired
-    private JwtUserDetailsService userDetailsService;
-
-    @PostMapping("")
-    public ResponseEntity Login(@Valid @RequestBody UserLoginDTO user) throws Exception {return userService.login(user);}
+    @PostMapping("/login")
+    public ResponseEntity Login(@Valid @RequestBody UserLoginDTO user) throws Exception {return loginService.login(user);}
 }

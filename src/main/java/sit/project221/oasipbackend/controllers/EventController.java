@@ -47,7 +47,7 @@ public class EventController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
-    public Object create(@Valid HttpServletRequest request, @Valid @RequestBody AddEventDTO newEvent) {
+    public void create(@Valid HttpServletRequest request, @Valid @RequestBody AddEventDTO newEvent) {
         int categoryId = Integer.parseInt(newEvent.getEventCategoryId());
         EventCategory eventCategory = eventCategoryRepository.findById(categoryId).orElseThrow(()->new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "Customer id "+ categoryId+
@@ -59,8 +59,10 @@ public class EventController {
         String body = "Your appointment has been registered successfully. \n \n" +
                 "Details  \n" + "Name : " + newEvent.getBookingName() + "\n" +"Clinic : " + eventCategory.getEventCategoryName() +
                 "\n" + "Date : " + formattedDate + "\n" + "Note : " + newEvent.getEventNote();
+
+        eventService.addEvent(request, newEvent);
         senderService.sendEmail(newEvent.getBookingEmail() , header , body);
-        return eventService.addEvent(request, newEvent);
+
     }
 
     @DeleteMapping("/{bookingId}")
