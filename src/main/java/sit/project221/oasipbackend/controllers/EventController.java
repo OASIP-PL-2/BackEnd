@@ -42,8 +42,8 @@ public class EventController {
     }
 
     //Category ID
-    @GetMapping("/categories/{categoryID}")
-    public List<GetEventDTO> getEventByCategory(@PathVariable Integer categoryID) { return eventService.getEventByCategory(categoryID);}
+//    @GetMapping("/categories/{categoryID}")
+//    public List<GetEventDTO> getEventByCategory(@PathVariable Integer categoryID) { return eventService.getEventByCategory(categoryID);}
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")

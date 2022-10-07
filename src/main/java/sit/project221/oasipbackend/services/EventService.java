@@ -5,7 +5,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.server.ResponseStatusException;
 import sit.project221.oasipbackend.config.JwtTokenUtil;
 import sit.project221.oasipbackend.controllers.ValidationHandler;
@@ -13,7 +12,9 @@ import sit.project221.oasipbackend.dtos.AddEventDTO;
 import sit.project221.oasipbackend.dtos.GetEventDTO;
 import sit.project221.oasipbackend.dtos.UpdateEventDTO;
 import sit.project221.oasipbackend.entities.Event;
+import sit.project221.oasipbackend.entities.EventCategoryOwner;
 import sit.project221.oasipbackend.entities.User;
+import sit.project221.oasipbackend.repositories.EventCategoryOwnerRepository;
 import sit.project221.oasipbackend.repositories.EventRepository;
 import sit.project221.oasipbackend.repositories.UserRepository;
 import sit.project221.oasipbackend.utils.ListMapper;
@@ -31,6 +32,8 @@ public class EventService {
     @Autowired
     private EventRepository eventRepository;
 
+    @Autowired
+    private EventCategoryOwnerRepository eventCategoryOwnerRepository;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -63,6 +66,11 @@ public class EventService {
         } else if (userOwner.getRole().equals("student")) {
             System.out.println("เข้า student");
             eventList = eventRepository.findAllByOwner(userOwner.getEmail());
+        } else if (userOwner.getRole().equals("lecturer")){
+            System.out.println("เข้า lecturer");
+            List<Integer> categoriesId = eventCategoryOwnerRepository.findAllByUserId(userOwner.getId());
+            System.out.println(categoriesId);
+            eventList = eventRepository.findAllByEventCategory(categoriesId);
         }
         return listMapper.mapList(eventList, GetEventDTO.class, modelMapper);
     }
@@ -169,12 +177,14 @@ public class EventService {
         return updateEvent;
     }
 
-    public List<GetEventDTO> getEventByCategory (Integer id){
+    public List<GetEventDTO> getEventByCategory (ArrayList id){
         ArrayList<Event> filterEventList = new ArrayList<>();
         List<Event> eventList = eventRepository.findAllByOrderByEventStartTimeDesc();
         for(Event event : eventList){
-            if(event.getEventCategoryId().getId() == id){
-                filterEventList.add(event);
+            for(Object idCate : id){
+                if(event.getEventCategoryId().getId() == idCate){
+                    filterEventList.add(event);
+                }
             }
         }
         return listMapper.mapList(filterEventList, GetEventDTO.class, modelMapper);

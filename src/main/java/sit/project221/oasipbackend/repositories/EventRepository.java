@@ -17,6 +17,9 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     @Query("select a from Event a where a.bookingEmail = :ownerEmail order by a.eventStartTime DESC")
     List<Event> findAllByOwner(@Param("ownerEmail") String ownerEmail);
 
+    @Query("select a from Event a where a.eventCategoryId.id in :idCate")
+    List<Event> findAllByEventCategory(@Param("idCate") List<Integer> idCate);
+
     @Query("select a from Event a where a.eventStartTime <= :currentDateTime order by a.eventStartTime DESC")
     List<Event> findPastEvent(@Param("currentDateTime") LocalDateTime currentDateTime);
     @Query("select a from Event a where a.eventStartTime >= :currentDateTime")
