@@ -1,5 +1,6 @@
 package sit.project221.oasipbackend.storage;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -9,6 +10,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.stream.Stream;
 
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -29,19 +31,21 @@ public class FileSystemStorageService implements StorageService {
 	}
 
 	@Override
-	public void store(MultipartFile file) {
+	public void store(MultipartFile file, Integer eventId) {
 		try {
 			if (file.isEmpty()) {
 				throw new StorageException("Failed to store empty file.");
 			}
-			Path destinationFile = this.rootLocation.resolve(
+
+			Path newPath = newFolder(eventId.toString());
+			Path destinationFile = newPath.resolve(
 					Paths.get(file.getOriginalFilename()))
 					.normalize().toAbsolutePath();
-			if (!destinationFile.getParent().equals(this.rootLocation.toAbsolutePath())) {
-				// This is a security check
-				throw new StorageException(
-						"Cannot store file outside current directory.");
-			}
+//			if (!destinationFile.getParent().equals(this.rootLocation.toAbsolutePath())) {
+//				// This is a security check
+//				throw new StorageException(
+//						"Cannot store file outside current directory.");
+//			}
 			try (InputStream inputStream = file.getInputStream()) {
 				Files.copy(inputStream, destinationFile,
 					StandardCopyOption.REPLACE_EXISTING);
@@ -50,6 +54,24 @@ public class FileSystemStorageService implements StorageService {
 		catch (IOException e) {
 			throw new StorageException("Failed to store file.", e);
 		}
+	}
+
+	public Path newFolder(String folderName) throws IOException {
+		File folder = new File(rootLocation + "\\" + folderName);
+		Path pathWithFolder = Paths.get(folder.getPath());
+        if (!folder.exists()) {
+            if (folder.mkdir()) {
+                System.out.println(rootLocation + "\\" + folderName);
+				return pathWithFolder;
+            } else {
+                System.out.println("Failed to create directory!");
+            }
+        }else {
+            FileUtils.cleanDirectory(folder);
+            System.out.println(rootLocation + "\\" + folderName);
+			return pathWithFolder;
+        }
+		return pathWithFolder;
 	}
 
 	@Override

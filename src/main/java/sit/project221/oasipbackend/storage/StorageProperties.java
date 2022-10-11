@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 
-@ConfigurationProperties("storage")
+@ConfigurationProperties("storage2")
 public class StorageProperties {
 
 	/**

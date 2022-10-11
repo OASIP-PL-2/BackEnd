@@ -61,7 +61,7 @@ public class EventController {
                 "\n" + "Date : " + formattedDate + "\n" + "Note : " + newEvent.getEventNote();
 
         eventService.addEvent(request, newEvent);
-        senderService.sendEmail(newEvent.getBookingEmail() , header , body);
+//        senderService.sendEmail(newEvent.getBookingEmail() , header , body);
 
     }
 

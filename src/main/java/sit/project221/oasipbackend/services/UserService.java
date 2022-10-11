@@ -17,7 +17,7 @@ import sit.project221.oasipbackend.repositories.UserRepository;
 import sit.project221.oasipbackend.utils.ListMapper;
 import sit.project221.oasipbackend.utils.Roles;
 
-import java.util.Arrays;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Service
@@ -41,6 +41,22 @@ public class UserService {
     @Autowired
     private AuthenticationManager authenticationManager;
 
+    private final JwtTokenUtil jwtTokenUtill;
+
+    public UserService(JwtTokenUtil jwtTokenUtill) {
+        this.jwtTokenUtill = jwtTokenUtill;
+    }
+
+
+    public User getUserFromRequest(HttpServletRequest request) {
+        if (request.getHeader("Authorization") != null) {
+            String token = request.getHeader("Authorization").substring(7);
+            String userEmail = jwtTokenUtill.getUsernameFromToken(token);
+            return  userRepository.findByEmail(userEmail);
+        }
+        return null;
+    }
+
     public List<GetAllUserDTO> getAllUser(){
         List<User> users = userRepository.findAllByOrderByNameAsc();
         return listMapper.mapList(users, GetAllUserDTO.class, modelMapper);
@@ -54,7 +70,15 @@ public class UserService {
                 ));
         return modelMapper.map(user, GetDetailUserDTO.class);
     }
-    public Object AddUser(UserDTO newUser) {
+    public Object AddUser(HttpServletRequest request,UserDTO newUser) {
+        User userOwner = getUserFromRequest(request);
+
+        if (userOwner != null) {
+            if (userOwner.getRole().equals("student") || userOwner.getRole().equals("lecturer")) {
+                return ValidationHandler.showError(HttpStatus.FORBIDDEN, "You not have permission to add new user");
+            }
+        }
+
         User addUserList = modelMapper.map(newUser, User.class);
         addUserList.setName(newUser.getName().trim());
         addUserList.setEmail(newUser.getEmail().trim());

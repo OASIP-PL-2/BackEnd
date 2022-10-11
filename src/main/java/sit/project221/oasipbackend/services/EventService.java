@@ -50,9 +50,12 @@ public class EventService {
     }
 
     public User getUserFromRequest(HttpServletRequest request) {
-        String token = request.getHeader("Authorization").substring(7);
-        String userEmail = jwtTokenUtill.getUsernameFromToken(token);
-        return  userRepository.findByEmail(userEmail);
+        if (request.getHeader("Authorization") != null) {
+            String token = request.getHeader("Authorization").substring(7);
+            String userEmail = jwtTokenUtill.getUsernameFromToken(token);
+            return  userRepository.findByEmail(userEmail);
+        }
+        return null;
     }
 
     public List<GetEventDTO> getAllEvent(HttpServletRequest request){
@@ -96,9 +99,11 @@ public class EventService {
     public Object addEvent(HttpServletRequest request, AddEventDTO newEvent){
         User userOwner = getUserFromRequest(request);
 
-        if (userOwner.getRole().equals("student")) {
-            if (!userOwner.getEmail().equals(newEvent.getBookingEmail())) {
-                return ValidationHandler.showError(HttpStatus.BAD_REQUEST, "the booking email must be the same as student's email");
+        if (userOwner != null) {
+            if (userOwner.getRole().equals("student")) {
+                if (!userOwner.getEmail().equals(newEvent.getBookingEmail())) {
+                    return ValidationHandler.showError(HttpStatus.BAD_REQUEST, "the booking email must be the same as student's email");
+                }
             }
         }
 

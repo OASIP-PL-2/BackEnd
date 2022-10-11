@@ -51,13 +51,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
 //                .exceptionHandling().accessDeniedHandler(new JwtAccessDenied()).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .authorizeRequests().antMatchers(HttpMethod.POST, "/api/login", "/api/users" , "api/events").permitAll()
+                .authorizeRequests().antMatchers(HttpMethod.POST, "/api/login", "/api/users" , "/api/events").permitAll()
                 .antMatchers("/api/users/**","/api/match/**").hasRole("admin")
 //                .antMatchers("/api/events/**").hasRole("student")
                 .antMatchers(HttpMethod.POST ,  "/api/events/**" ).access("hasRole('admin') or hasRole('student')")
                 .antMatchers(HttpMethod.DELETE ,  "/api/events/**" ).access("hasRole('admin') or hasRole('student')")
                 .antMatchers(HttpMethod.PUT ,  "/api/events/**" ).access("hasRole('admin') or hasRole('student')")
-//                .antMatchers("/api/refresh").permitAll()
                 .anyRequest().authenticated();
         httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 //

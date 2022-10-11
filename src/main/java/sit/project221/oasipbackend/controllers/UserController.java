@@ -12,6 +12,7 @@ import sit.project221.oasipbackend.services.UserService;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -36,8 +37,8 @@ public class UserController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("")
-    public Object create(@Valid @RequestBody UserDTO newUser) {
-        return userService.AddUser(newUser);
+    public Object create(HttpServletRequest request, @Valid @RequestBody UserDTO newUser) {
+        return userService.AddUser(request, newUser);
     }
 
     @DeleteMapping("/{id}")
