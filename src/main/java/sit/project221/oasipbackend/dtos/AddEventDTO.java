@@ -25,9 +25,9 @@ public class AddEventDTO {
             flags = Pattern.Flag.CASE_INSENSITIVE, message = "Email should be valid")
     @NotNull(message = "Email cannot be Null")
     private String bookingEmail;
-    @NotEmpty
-    @NotBlank(message="name can not be blank")
-    @Size(max = 100, message = "username must not be more than 100 characters")
+    @NotEmpty(message="booking name can not be empty")
+    @NotBlank(message="booking name can not be blank")
+    @Size(max = 100, message = "booking name must not be more than 100 characters")
     private String bookingName;
     private Integer eventDuration;
     @Size(max = 500, message = "eventNotes must not be more than 500 characters")

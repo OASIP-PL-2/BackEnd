@@ -5,6 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import sit.project221.oasipbackend.config.JwtTokenUtil;
 import sit.project221.oasipbackend.controllers.ValidationHandler;
@@ -12,19 +13,21 @@ import sit.project221.oasipbackend.dtos.AddEventDTO;
 import sit.project221.oasipbackend.dtos.GetEventDTO;
 import sit.project221.oasipbackend.dtos.UpdateEventDTO;
 import sit.project221.oasipbackend.entities.Event;
-import sit.project221.oasipbackend.entities.EventCategoryOwner;
 import sit.project221.oasipbackend.entities.User;
 import sit.project221.oasipbackend.repositories.EventCategoryOwnerRepository;
 import sit.project221.oasipbackend.repositories.EventRepository;
 import sit.project221.oasipbackend.repositories.UserRepository;
+import sit.project221.oasipbackend.storage.StorageService;
 import sit.project221.oasipbackend.utils.ListMapper;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validator;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 
 @Service
@@ -41,6 +44,11 @@ public class EventService {
     @Autowired
     private ListMapper listMapper;
 
+    @Autowired
+    private StorageService storageService;
+
+    @Autowired
+    private Validator validator;
     private final JwtTokenUtil jwtTokenUtill;
     private final JwtUserDetailsService jwtUserDetailsService;
 
@@ -96,7 +104,18 @@ public class EventService {
         return modelMapper.map(event, GetEventDTO.class);
     }
 
-    public Object addEvent(HttpServletRequest request, AddEventDTO newEvent){
+
+    public Object addEvent(HttpServletRequest request,AddEventDTO newEvent, MultipartFile file){
+        //check valid
+        Set<ConstraintViolation<AddEventDTO>> violations = validator.validate(newEvent);
+        if (!violations.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (ConstraintViolation<AddEventDTO> constraintViolation : violations) {
+                sb.append(constraintViolation.getMessage());
+            }
+            throw new ConstraintViolationException("Error occurred: " + sb.toString(), violations);
+        }
+
         User userOwner = getUserFromRequest(request);
 
         if (userOwner != null) {
@@ -110,7 +129,12 @@ public class EventService {
         Event addEventList = modelMapper.map(newEvent, Event.class);
         List<Event> eventList = eventRepository.findEventByEventCategoryIdEquals(addEventList.getEventCategoryId());
         checkTimeOverLap(newEvent.getEventStartTime(), newEvent.getEventDuration(),eventList );
-        return eventRepository.saveAndFlush(addEventList);
+
+        Event addedEvent = eventRepository.saveAndFlush(addEventList);
+        if(!file.isEmpty()) {
+            storageService.store(file, addedEvent.getId());
+        }
+        return file.getOriginalFilename();
     }
 
     private void checkTimeOverLap(LocalDateTime updateDateTime, Integer newEventDuration, List<Event> eventList) {
@@ -150,10 +174,23 @@ public class EventService {
         }
 
         eventRepository.deleteById(bookingId);
+        storageService.deleteFileById(bookingId);
         return event;
     }
 
-    public Object updateEvent(HttpServletRequest request, UpdateEventDTO updateEvent, Integer bookingId){
+    public Object updateEvent(HttpServletRequest request, UpdateEventDTO updateEvent, MultipartFile file, Integer bookingId){
+        //check valid
+        Set<ConstraintViolation<UpdateEventDTO>> violations = validator.validate(updateEvent);
+        if (!violations.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (ConstraintViolation<UpdateEventDTO> constraintViolation : violations) {
+                sb.append(constraintViolation.getMessage());
+            }
+            throw new ConstraintViolationException("Error occurred: " + sb.toString(), violations);
+        }
+
+
+
         User userOwner = getUserFromRequest(request);
         Event event = eventRepository.findById(bookingId).orElseThrow(()->
                 new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -178,7 +215,13 @@ public class EventService {
         event.setEventStartTime(updateEvent.getEventStartTime());
         event.setEventNote(updateEvent.getEventNote());
         event.setEventCategoryId(updateEventList.getEventCategoryId());
-        eventRepository.saveAndFlush(event);
+        Event updatedEvent = eventRepository.saveAndFlush(event);
+        if(file.isEmpty()){
+            storageService.deleteFileById(updatedEvent.getId());
+        }else{
+            storageService.store(file, updatedEvent.getId());
+        }
+
         return updateEvent;
     }
 

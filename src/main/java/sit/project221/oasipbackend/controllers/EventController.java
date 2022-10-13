@@ -1,8 +1,12 @@
 package sit.project221.oasipbackend.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import sit.project221.oasipbackend.dtos.AddEventDTO;
 import sit.project221.oasipbackend.dtos.GetEventDTO;
@@ -24,6 +28,8 @@ import java.util.List;
 public class EventController {
     @Autowired
     private EventService eventService;
+    @Autowired
+    private ModelMapper modelMapper;
     private EmailSenderService senderService;
     private EventCategoryRepository eventCategoryRepository;
     public EventController(EmailSenderService senderService, EventCategoryRepository eventCategoryRepository) {
@@ -46,11 +52,15 @@ public class EventController {
 //    public List<GetEventDTO> getEventByCategory(@PathVariable Integer categoryID) { return eventService.getEventByCategory(categoryID);}
 
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("")
-    public void create(@Valid HttpServletRequest request, @Valid @RequestBody AddEventDTO newEvent) {
+    @PostMapping(path="",consumes = {"multipart/form-data"})
+    public Object create(@Valid HttpServletRequest request, @RequestParam("event") String event, @RequestParam("file") MultipartFile file) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
+        AddEventDTO newEvent  = objectMapper.readValue(event, AddEventDTO.class);
+
         int categoryId = Integer.parseInt(newEvent.getEventCategoryId());
         EventCategory eventCategory = eventCategoryRepository.findById(categoryId).orElseThrow(()->new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "Customer id "+ categoryId+
+                HttpStatus.NOT_FOUND, "Category id "+ categoryId+
                 "Does Not Exist !!!"
         ));
         LocalDateTime time = newEvent.getEventStartTime();
@@ -60,8 +70,9 @@ public class EventController {
                 "Details  \n" + "Name : " + newEvent.getBookingName() + "\n" +"Clinic : " + eventCategory.getEventCategoryName() +
                 "\n" + "Date : " + formattedDate + "\n" + "Note : " + newEvent.getEventNote();
 
-        eventService.addEvent(request, newEvent);
+
 //        senderService.sendEmail(newEvent.getBookingEmail() , header , body);
+        return eventService.addEvent(request, newEvent, file);
 
     }
 
@@ -71,8 +82,12 @@ public class EventController {
     }
 
     @PutMapping("/{bookingId}")
-    public Object update(@Valid HttpServletRequest request, @Valid @RequestBody UpdateEventDTO updateEvent, @PathVariable Integer bookingId) {
-        return eventService.updateEvent(request, updateEvent, bookingId);
+    public Object update(@Valid HttpServletRequest request, @RequestParam("event") String event, @RequestParam("file") MultipartFile file, @PathVariable Integer bookingId) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.findAndRegisterModules();
+        UpdateEventDTO editEvent  = objectMapper.readValue(event, UpdateEventDTO.class);
+
+        return eventService.updateEvent(request, editEvent, file, bookingId);
     }
 
     @GetMapping("/past")

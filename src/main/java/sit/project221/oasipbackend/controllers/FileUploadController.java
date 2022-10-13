@@ -56,6 +56,12 @@ public class FileUploadController {
 //		return "You successfully uploaded " + file.getOriginalFilename() + "!";
 	}
 
+	@DeleteMapping("{eventId}")
+	public ResponseEntity<String> deleteById(@PathVariable Integer eventId, RedirectAttributes redirectAttributes) {
+		storageService.deleteFileById(eventId);
+		return ResponseEntity.ok("You successfully delete ");
+	}
+
 
 	@ExceptionHandler(StorageFileNotFoundException.class)
 	public ResponseEntity<?> handleStorageFileNotFound(StorageFileNotFoundException exc) {
