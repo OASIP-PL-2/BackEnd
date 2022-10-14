@@ -53,7 +53,7 @@ public class EventController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(path="",consumes = {"multipart/form-data"})
-    public Object create(@Valid HttpServletRequest request, @RequestParam("event") String event, @RequestParam("file") MultipartFile file) throws JsonProcessingException {
+    public Object create(@Valid HttpServletRequest request, @RequestParam("event") String event, @RequestParam(name = "file", required = false) MultipartFile file) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.findAndRegisterModules();
         AddEventDTO newEvent  = objectMapper.readValue(event, AddEventDTO.class);

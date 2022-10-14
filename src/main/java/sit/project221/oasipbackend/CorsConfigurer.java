@@ -14,7 +14,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
         @Override
         public void addCorsMappings(CorsRegistry registry) {
             registry.addMapping("/**")
-                    .allowedMethods("GET", "POST", "HEAD", "POST", "DELETE").allowedOrigins("*")
+                    .allowedMethods("GET", "POST", "HEAD", "PUT", "DELETE").allowedOrigins("*")
                     .allowedHeaders("*");
         }
     }

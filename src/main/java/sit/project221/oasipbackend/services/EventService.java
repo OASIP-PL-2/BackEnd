@@ -131,10 +131,13 @@ public class EventService {
         checkTimeOverLap(newEvent.getEventStartTime(), newEvent.getEventDuration(),eventList );
 
         Event addedEvent = eventRepository.saveAndFlush(addEventList);
-        if(!file.isEmpty()) {
-            storageService.store(file, addedEvent.getId());
+        if(file != null) {
+            if (!file.isEmpty()) {
+                storageService.store(file, addedEvent.getId());
+                return file.getOriginalFilename();
+            }
         }
-        return file.getOriginalFilename();
+        return addedEvent;
     }
 
     private void checkTimeOverLap(LocalDateTime updateDateTime, Integer newEventDuration, List<Event> eventList) {
