@@ -8,6 +8,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.apache.tomcat.util.http.fileupload.FileUtils;
@@ -16,7 +18,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -88,14 +89,14 @@ public class FileSystemStorageService implements StorageService {
 	}
 
 	@Override
-	public Path load(String filename) {
-		return rootLocation.resolve(filename);
+	public Path load(Integer eventId, String filename) {
+		return rootLocation.resolve(String.valueOf(eventId)).resolve(filename);
 	}
 
 	@Override
-	public Resource loadAsResource(String filename) {
+	public Resource loadAsResource(Integer eventId, String filename) {
 		try {
-			Path file = load(filename);
+			Path file = load(eventId, filename);
 			Resource resource = new UrlResource(file.toUri());
 			if (resource.exists() || resource.isReadable()) {
 				return resource;
@@ -109,6 +110,21 @@ public class FileSystemStorageService implements StorageService {
 		catch (MalformedURLException e) {
 			throw new StorageFileNotFoundException("Could not read file: " + filename, e);
 		}
+	}
+
+	@Override
+	public List<String> listFileName(Integer eventId) {
+		File folder = new File(rootLocation.resolve(String.valueOf(eventId)).toUri());
+		List<File> listOfFiles = List.of(folder.listFiles());
+		List<String> listOfFilenames = new ArrayList<>();
+
+		for (File file : listOfFiles) {
+			if (file.isFile()) {
+				listOfFilenames.add(file.getName());
+				System.out.println(listOfFilenames);
+			}
+		}
+		return listOfFilenames;
 	}
 
 	@Override
