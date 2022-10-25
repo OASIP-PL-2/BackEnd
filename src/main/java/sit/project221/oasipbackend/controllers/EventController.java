@@ -82,7 +82,7 @@ public class EventController {
     }
 
     @PutMapping("/{bookingId}")
-    public Object update(@Valid HttpServletRequest request, @RequestParam("event") String event, @RequestParam("file") MultipartFile file, @PathVariable Integer bookingId) throws JsonProcessingException {
+    public Object update(@Valid HttpServletRequest request, @RequestParam("event") String event, @RequestParam(name = "file", required = false) MultipartFile file, @PathVariable Integer bookingId) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.findAndRegisterModules();
         UpdateEventDTO editEvent  = objectMapper.readValue(event, UpdateEventDTO.class);

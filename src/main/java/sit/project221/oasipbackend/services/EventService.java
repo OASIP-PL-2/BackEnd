@@ -219,10 +219,21 @@ public class EventService {
         event.setEventNote(updateEvent.getEventNote());
         event.setEventCategoryId(updateEventList.getEventCategoryId());
         Event updatedEvent = eventRepository.saveAndFlush(event);
-        if(file.isEmpty()){
+//        if(file.isEmpty()){
+//            storageService.deleteFileById(updatedEvent.getId());
+//        }else{
+//            storageService.store(file, updatedEvent.getId());
+//        }
+
+        if(file != null) {
+            if (!file.isEmpty()) {
+                storageService.store(file, updatedEvent.getId());
+                return file.getOriginalFilename();
+            } else {
+                storageService.deleteFileById(updatedEvent.getId());
+            }
+        } else {
             storageService.deleteFileById(updatedEvent.getId());
-        }else{
-            storageService.store(file, updatedEvent.getId());
         }
 
         return updateEvent;
