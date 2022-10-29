@@ -128,19 +128,24 @@ public class EventService {
 
         Event addEventList = modelMapper.map(newEvent, Event.class);
         List<Event> eventList = eventRepository.findEventByEventCategoryIdEquals(addEventList.getEventCategoryId());
-        checkTimeOverLap(newEvent.getEventStartTime(), newEvent.getEventDuration(),eventList );
 
-        Event addedEvent = eventRepository.saveAndFlush(addEventList);
-        if(file != null) {
-            if (!file.isEmpty()) {
-                storageService.store(file, addedEvent.getId());
-                return file.getOriginalFilename();
+        System.out.println(checkTimeOverLap(newEvent.getEventStartTime(), newEvent.getEventDuration(),eventList ));
+        if (!checkTimeOverLap(newEvent.getEventStartTime(), newEvent.getEventDuration(),eventList))  {
+            Event addedEvent = eventRepository.saveAndFlush(addEventList);
+            if(file != null) {
+                if (!file.isEmpty()) {
+                    storageService.store(file, addedEvent.getId());
+                    return file.getOriginalFilename();
+                }
             }
+            return addedEvent;
+        } else {
+            return ValidationHandler.showError(HttpStatus.BAD_REQUEST, "Time is overlapping!! change date-time please");
         }
-        return addedEvent;
+
     }
 
-    private void checkTimeOverLap(LocalDateTime updateDateTime, Integer newEventDuration, List<Event> eventList) {
+    private Boolean checkTimeOverLap(LocalDateTime updateDateTime, Integer newEventDuration, List<Event> eventList) {
         LocalDateTime newEventStartTime = updateDateTime;
         LocalDateTime newEventEndTime = findEndDate(newEventStartTime, newEventDuration);
         for (Event event : eventList) {
@@ -152,10 +157,10 @@ public class EventService {
                     newEventStartTime.isBefore(eventEndTime) && newEventEndTime.isAfter(eventEndTime) ||
                     newEventStartTime.isBefore(eventStartTime) && newEventEndTime.isAfter(eventEndTime) ||
                     newEventStartTime.isAfter(eventStartTime) && newEventEndTime.isBefore(eventEndTime)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Time is overlapping!! change date-time please");
+                return true;
             }
         }
+        return false;
     }
 
     private LocalDateTime findEndDate(LocalDateTime eventStartTime, Integer duration) {

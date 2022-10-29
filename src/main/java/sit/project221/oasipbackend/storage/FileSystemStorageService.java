@@ -13,12 +13,16 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.apache.tomcat.util.http.fileupload.FileUtils;
+import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 
 @Service
@@ -28,7 +32,8 @@ public class FileSystemStorageService implements StorageService {
 
 	@Autowired
 	public FileSystemStorageService(StorageProperties properties) {
-		this.rootLocation = Paths.get(properties.getLocation());
+//		this.rootLocation = Paths.get(properties.getLocation());
+		this.rootLocation = Paths.get(properties.getLocation()).toAbsolutePath().normalize();
 	}
 
 	@Override
@@ -58,21 +63,24 @@ public class FileSystemStorageService implements StorageService {
 	}
 
 	public Path newFolder(String folderName) throws IOException {
-		File folder = new File(rootLocation + "\\" + folderName);
-		Path pathWithFolder = Paths.get(folder.getPath());
-        if (!folder.exists()) {
-            if (folder.mkdir()) {
-                System.out.println(rootLocation + "\\" + folderName);
-				return pathWithFolder;
-            } else {
-                System.out.println("Failed to create directory!");
-            }
+		Path folder = this.rootLocation.resolve(folderName);
+		Resource resource = new UrlResource(folder.toUri());
+//		File folder = new File(rootLocation + "\\" + folderName);
+//		Path pathWithFolder = Paths.get(folder.getPath());
+        if (!resource.exists()) {
+			Files.createDirectory(folder);
+			return folder;
+//            if (Files.createDirectory(folder)) {
+//                System.out.println(rootLocation + "\\" + folderName);
+//				return pathWithFolder;
+//            } else {
+//                System.out.println("Failed to create directory!");
+//            }
         }else {
-            FileUtils.cleanDirectory(folder);
+            FileUtils.cleanDirectory(folder.toFile());
             System.out.println(rootLocation + "\\" + folderName);
-			return pathWithFolder;
+			return folder;
         }
-		return pathWithFolder;
 	}
 
 	@Override

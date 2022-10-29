@@ -12,7 +12,7 @@ public class StorageProperties {
 	/**
 	 * Folder location for storing files
 	 */
-	private String location;
+	public static String location;
 
 	public String getLocation() {
 		return location;
