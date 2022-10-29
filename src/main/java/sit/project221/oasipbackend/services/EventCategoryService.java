@@ -6,12 +6,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import sit.project221.oasipbackend.config.JwtTokenUtil;
 import sit.project221.oasipbackend.controllers.ValidationHandler;
 import sit.project221.oasipbackend.dtos.GetEventCategoryDTO;
 import sit.project221.oasipbackend.dtos.UpdateEventCategoryDTO;
+import sit.project221.oasipbackend.entities.Event;
 import sit.project221.oasipbackend.entities.EventCategory;
+import sit.project221.oasipbackend.entities.User;
+import sit.project221.oasipbackend.repositories.EventCategoryOwnerRepository;
 import sit.project221.oasipbackend.repositories.EventCategoryRepository;
+import sit.project221.oasipbackend.repositories.UserRepository;
 import sit.project221.oasipbackend.utils.ListMapper;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -20,13 +28,52 @@ public class EventCategoryService {
     @Autowired
     private EventCategoryRepository eventCategoryRepository;
     @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private EventCategoryOwnerRepository eventCategoryOwnerRepository;
+    @Autowired
     private ModelMapper modelMapper;
     @Autowired
     private ListMapper listMapper;
 
-    public List<GetEventCategoryDTO> getAllEventCategory(){
+    private final JwtTokenUtil jwtTokenUtill;
+    private final JwtUserDetailsService jwtUserDetailsService;
+
+    public EventCategoryService(JwtTokenUtil jwtTokenUtill, JwtUserDetailsService jwtUserDetailsService) {
+        this.jwtTokenUtill = jwtTokenUtill;
+        this.jwtUserDetailsService = jwtUserDetailsService;
+    }
+
+    public User getUserFromRequest(HttpServletRequest request) {
+        if (request.getHeader("Authorization") != null) {
+            String token = request.getHeader("Authorization").substring(7);
+            String userEmail = jwtTokenUtill.getUsernameFromToken(token);
+            return  userRepository.findByEmail(userEmail);
+        }
+        return null;
+    }
+    public List<GetEventCategoryDTO> getAllEventCategory(HttpServletRequest request){
+        User userOwner = getUserFromRequest(request);
         List<EventCategory> eventCategoryList = eventCategoryRepository.findAllByOrderByIdDesc();
-        return listMapper.mapList(eventCategoryList, GetEventCategoryDTO.class, modelMapper);
+        List<EventCategory> eventCategoryFilter = new ArrayList<>();
+
+        if (userOwner != null) {
+            if (userOwner.getRole().equals("lecturer")){
+                System.out.println("เข้า lecturer");
+                List<Integer> categoriesId = eventCategoryOwnerRepository.findAllByUserId(userOwner.getId());
+                for(EventCategory category : eventCategoryList){
+                    if (categoriesId.contains(category.getId())) {
+                        eventCategoryFilter.add(category);
+                    }
+                }
+            } else {
+                eventCategoryFilter = eventCategoryList;
+            }
+        } else {
+            eventCategoryFilter = eventCategoryList;
+        }
+
+        return listMapper.mapList(eventCategoryFilter, GetEventCategoryDTO.class, modelMapper);
     }
 
     public GetEventCategoryDTO getEventByCategoryId(Integer categoryId){

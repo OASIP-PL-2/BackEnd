@@ -219,11 +219,6 @@ public class EventService {
         event.setEventNote(updateEvent.getEventNote());
         event.setEventCategoryId(updateEventList.getEventCategoryId());
         Event updatedEvent = eventRepository.saveAndFlush(event);
-//        if(file.isEmpty()){
-//            storageService.deleteFileById(updatedEvent.getId());
-//        }else{
-//            storageService.store(file, updatedEvent.getId());
-//        }
 
         if(file != null) {
             if (!file.isEmpty()) {
@@ -252,44 +247,57 @@ public class EventService {
         return listMapper.mapList(filterEventList, GetEventDTO.class, modelMapper);
     }
 
-    public List<GetEventDTO> getPastEvent(){
+    public List<GetEventDTO> getPastEvent(HttpServletRequest request){
+        User userOwner = getUserFromRequest(request);
+
         LocalDateTime currentDateTime;
         currentDateTime = LocalDateTime.now();
         List<Event> eventList = eventRepository.findPastEvent(currentDateTime);
-        return listMapper.mapList(eventList, GetEventDTO.class, modelMapper);
+        List<Event> eventListFilter = eventListByRole(eventList, userOwner);
+
+        return listMapper.mapList(eventListFilter, GetEventDTO.class, modelMapper);
     }
-    public List<GetEventDTO> getFutureEvent(){
+    public List<GetEventDTO> getFutureEvent(HttpServletRequest request){
+        User userOwner = getUserFromRequest(request);
         LocalDateTime currentDateTime;
         currentDateTime = LocalDateTime.now();
         List<Event> eventList = eventRepository.findFutureEvent(currentDateTime);
-        return listMapper.mapList(eventList, GetEventDTO.class, modelMapper);
+        List<Event> eventListFilter = eventListByRole(eventList, userOwner);
+        return listMapper.mapList(eventListFilter, GetEventDTO.class, modelMapper);
     }
 
-    public List<GetEventDTO> getEventsByDate(Integer date){
+    public List<GetEventDTO> getEventsByDate(HttpServletRequest request, Integer date){
+        User userOwner = getUserFromRequest(request);
         val formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
         val dateTime = LocalDate.parse(date.toString(),formatter);
         LocalDateTime startTime = LocalDateTime.of(dateTime.getYear(), dateTime.getMonth(), dateTime.getDayOfMonth(), 00, 00, 00);
         LocalDateTime endTime = LocalDateTime.of(dateTime.getYear(), dateTime.getMonth(), dateTime.getDayOfMonth(), 23, 59, 59);
-//        LocalDateTime startTime = LocalDateTime.of(2022, Month.AUGUST, 20, 00, 00, 00);
-//        LocalDateTime endTime = LocalDateTime.of(2022, Month.AUGUST, 20, 23, 59, 59);
         List<Event> eventList = eventRepository.findEventsByDate(startTime,endTime);
-        return listMapper.mapList(eventList, GetEventDTO.class, modelMapper);
+        List<Event> eventListFilter = eventListByRole(eventList, userOwner);
+
+        return listMapper.mapList(eventListFilter, GetEventDTO.class, modelMapper);
+    }
+
+    public List<Event> eventListByRole(List<Event> eventList, User userOwner) {
+        List<Event> eventListFilter = new ArrayList<>();
+
+        if (userOwner.getRole().equals("admin")){
+            eventListFilter = eventList;
+        } else if (userOwner.getRole().equals("student")) {
+            for(Event event : eventList){
+                if (event.getBookingEmail().equals(userOwner.getEmail())) {
+                    eventListFilter.add(event);
+                }
+            }
+        } else if (userOwner.getRole().equals("lecturer")){
+            List<Integer> categoriesId = eventCategoryOwnerRepository.findAllByUserId(userOwner.getId());
+            for(Event event : eventList){
+                if (categoriesId.contains(event.getEventCategoryId().getId())) {
+                    eventListFilter.add(event);
+                }
+            }
+        }
+        return eventListFilter;
     }
 }
 
-
-
-
-//    public List<GetEventDTO> getPastEvent(){
-//        LocalDateTime currentDateTime;
-//        currentDateTime = LocalDateTime.now();
-//        List<Event> eventList = eventRepository.findEventByEventStartTimeIsBeforeOrderByEventStartTimeDesc(currentDateTime);
-//        return listMapper.mapList(eventList, GetEventDTO.class, modelMapper);
-//    }
-//
-//    public List<GetEventDTO> getUpcomingEvent(){
-//        LocalDateTime currentDateTime;
-//        currentDateTime = LocalDateTime.now();
-//        List<Event> eventList = eventRepository.findEventByEventStartTimeIsAfterOrderByEventStartTimeAsc(currentDateTime);
-//        return listMapper.mapList(eventList, GetEventDTO.class, modelMapper);
-//    }

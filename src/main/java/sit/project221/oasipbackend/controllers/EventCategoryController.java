@@ -10,6 +10,7 @@ import sit.project221.oasipbackend.services.EventCategoryService;
 import sit.project221.oasipbackend.services.EventService;
 
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 @EnableAutoConfiguration
@@ -24,8 +25,8 @@ public class EventCategoryController {
     private EventService eventService;
 
     @GetMapping("")
-    public List<GetEventCategoryDTO> getEventCategory() {
-        return eventCategoryService.getAllEventCategory();
+    public List<GetEventCategoryDTO> getEventCategory(HttpServletRequest request) {
+        return eventCategoryService.getAllEventCategory(request);
     }
 
     @GetMapping("{categoryId}")

@@ -91,17 +91,17 @@ public class EventController {
     }
 
     @GetMapping("/past")
-    public List<GetEventDTO> getPastEvent() {
-        return eventService.getPastEvent();
+    public List<GetEventDTO> getPastEvent(HttpServletRequest request) {
+        return eventService.getPastEvent(request);
     }
 
     @GetMapping("/future")
-    public List<GetEventDTO> getFutureEvent() {
-        return eventService.getFutureEvent();
+    public List<GetEventDTO> getFutureEvent(HttpServletRequest request) {
+        return eventService.getFutureEvent(request);
     }
 
     @GetMapping("/date/{date}")
-    public List<GetEventDTO> getEventsByDate(@PathVariable Integer date) {
-        return eventService.getEventsByDate(date);
+    public List<GetEventDTO> getEventsByDate(HttpServletRequest request, @PathVariable Integer date) {
+        return eventService.getEventsByDate(request, date);
     }
 }
