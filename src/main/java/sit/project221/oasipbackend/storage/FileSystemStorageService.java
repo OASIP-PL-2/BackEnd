@@ -30,10 +30,21 @@ public class FileSystemStorageService implements StorageService {
 
 	private final Path rootLocation;
 
+//	@Autowired
+//	public FileSystemStorageService(StorageProperties properties) {
+////		this.rootLocation = Paths.get(properties.getLocation());
+//		this.rootLocation = Paths.get(properties.getLocation()).toAbsolutePath().normalize();
+//	}
+
 	@Autowired
 	public FileSystemStorageService(StorageProperties properties) {
-//		this.rootLocation = Paths.get(properties.getLocation());
 		this.rootLocation = Paths.get(properties.getLocation()).toAbsolutePath().normalize();
+		try {
+			Files.createDirectories(this.rootLocation);
+		} catch (Exception ex) {
+			throw new RuntimeException(
+					"Could not create the directory where the uploaded files will be stored.", ex);
+		}
 	}
 
 	@Override
@@ -43,19 +54,22 @@ public class FileSystemStorageService implements StorageService {
 				throw new StorageException("Failed to store empty file.");
 			}
 
-			Path newPath = newFolder(eventId.toString());
-			Path destinationFile = newPath.resolve(
-					Paths.get(file.getOriginalFilename()))
-					.normalize().toAbsolutePath();
+			String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+			Path newPath = newFolder(String.valueOf(eventId));
+			Path targetLocation = this.rootLocation.resolve(String.valueOf(eventId) + "/" + fileName);
+			Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+//			Path destinationFile = newPath.resolve(
+//					Paths.get(file.getOriginalFilename()))
+//					.normalize().toAbsolutePath();
 //			if (!destinationFile.getParent().equals(this.rootLocation.toAbsolutePath())) {
 //				// This is a security check
 //				throw new StorageException(
 //						"Cannot store file outside current directory.");
 //			}
-			try (InputStream inputStream = file.getInputStream()) {
-				Files.copy(inputStream, destinationFile,
-					StandardCopyOption.REPLACE_EXISTING);
-			}
+//			try (InputStream inputStream = file.getInputStream()) {
+//				Files.copy(inputStream, destinationFile,
+//					StandardCopyOption.REPLACE_EXISTING);
+//			}
 		}
 		catch (IOException e) {
 			throw new StorageException("Failed to store file.", e);
@@ -68,7 +82,8 @@ public class FileSystemStorageService implements StorageService {
 //		File folder = new File(rootLocation + "\\" + folderName);
 //		Path pathWithFolder = Paths.get(folder.getPath());
         if (!resource.exists()) {
-			Files.createDirectory(folder);
+			Path path = Files.createDirectory(folder);
+			System.out.println(path);
 			return folder;
 //            if (Files.createDirectory(folder)) {
 //                System.out.println(rootLocation + "\\" + folderName);

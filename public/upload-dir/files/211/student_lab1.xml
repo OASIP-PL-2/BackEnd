@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<students>
+    <student id = "1">
+        <id>63130500134</id>
+        <name>
+            <firstname>Arisa</firstname>
+            <lastname>Audomkhachonkitti</lastname>
+        </name>
+        <gender>female</gender>
+        <email>arisa.ice@mail.kmutt.ac.th</email>
+        <university>
+            <name>KMUTT</name>
+            <faculty>SIT</faculty>
+            <major>IT</major>
+        </university>
+    </student>
+    <student id = "2">
+        <id>63130500086</id>
+        <name>
+            <firstname>Pichaya</firstname>
+            <lastname>Pairin</lastname>
+        </name>
+        <gender>male</gender>
+        <email>pichaya.game@mail.kmutt.ac.th</email>
+        <university>
+            <name>KMUTT</name>
+            <faculty>SIT</faculty>
+            <major>IT</major>
+        </university>
+    </student>
+</students>
