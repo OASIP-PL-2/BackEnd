@@ -12,13 +12,11 @@ import sit.project221.oasipbackend.entities.EventCategory;
 @Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class GetEventDTO {
+public class GetBlindEvent {
     private Integer id;
-    private String bookingName;
-    private String bookingEmail;
     private EventCategory eventCategoryId;
     @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventStartTime;
     private Integer eventDuration;
-    private String eventNote;
 }
+

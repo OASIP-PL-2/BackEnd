@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import sit.project221.oasipbackend.config.JwtTokenUtil;
 import sit.project221.oasipbackend.controllers.ValidationHandler;
 import sit.project221.oasipbackend.dtos.AddEventDTO;
+import sit.project221.oasipbackend.dtos.GetBlindEvent;
 import sit.project221.oasipbackend.dtos.GetEventDTO;
 import sit.project221.oasipbackend.dtos.UpdateEventDTO;
 import sit.project221.oasipbackend.entities.Event;
@@ -70,7 +71,6 @@ public class EventService {
         User userOwner = getUserFromRequest(request);
         System.out.println(userOwner.getEmail());
         List<Event> eventList = new ArrayList<>();
-
         if (userOwner.getRole().equals("admin")){
             System.out.println("เข้า admin");
             eventList = eventRepository.findAllByOrderByEventStartTimeDesc();
@@ -84,6 +84,12 @@ public class EventService {
             eventList = eventRepository.findAllByEventCategory(categoriesId);
         }
         return listMapper.mapList(eventList, GetEventDTO.class, modelMapper);
+    }
+
+    public List<GetBlindEvent> getAllBlindEvent (){
+        List<Event> eventList = new ArrayList<>();
+        eventList = eventRepository.findAllByOrderByEventStartTimeDesc();
+        return listMapper.mapList(eventList, GetBlindEvent.class, modelMapper);
     }
 
     public Object getEventById(HttpServletRequest request, Integer bookingId){

@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import sit.project221.oasipbackend.dtos.AddEventDTO;
+import sit.project221.oasipbackend.dtos.GetBlindEvent;
 import sit.project221.oasipbackend.dtos.GetEventDTO;
 import sit.project221.oasipbackend.dtos.UpdateEventDTO;
 import sit.project221.oasipbackend.entities.EventCategory;
@@ -40,6 +41,11 @@ public class EventController {
     @GetMapping("")
     public List<GetEventDTO> getAllEvent(@Valid HttpServletRequest request) {
         return eventService.getAllEvent(request);
+    }
+
+    @GetMapping("/blindEvent")
+    public List<GetBlindEvent> getAllBlindEvent(){
+        return eventService.getAllBlindEvent();
     }
 
     @GetMapping("/{bookingId}")
