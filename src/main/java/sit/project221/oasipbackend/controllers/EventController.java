@@ -2,6 +2,7 @@ package sit.project221.oasipbackend.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.netty.handler.codec.serialization.ObjectEncoder;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import sit.project221.oasipbackend.dtos.AddEventDTO;
 import sit.project221.oasipbackend.dtos.GetBlindEvent;
 import sit.project221.oasipbackend.dtos.GetEventDTO;
 import sit.project221.oasipbackend.dtos.UpdateEventDTO;
+import sit.project221.oasipbackend.entities.Event;
 import sit.project221.oasipbackend.entities.EventCategory;
 import sit.project221.oasipbackend.repositories.EventCategoryRepository;
 import sit.project221.oasipbackend.services.EmailSenderService;
@@ -70,16 +72,16 @@ public class EventController {
                 "Does Not Exist !!!"
         ));
         LocalDateTime time = newEvent.getEventStartTime();
-        String formattedDate = time.format(DateTimeFormatter.ofPattern("dd-MMM-yy-hh-mm"));
+        String formattedDate = time.format(DateTimeFormatter.ofPattern("dd-MMM-yyyy, hh.mm"));
         String header = "You have made a new appointment for 1 event.";
         String body = "Your appointment has been registered successfully. \n \n" +
                 "Details  \n" + "Name : " + newEvent.getBookingName() + "\n" +"Clinic : " + eventCategory.getEventCategoryName() +
-                "\n" + "Date : " + formattedDate + "\n" + "Note : " + newEvent.getEventNote();
+                "\n" + "Date : " + formattedDate + " น." + "\n" + "Note : " + newEvent.getEventNote();
 
 
-//        senderService.sendEmail(newEvent.getBookingEmail() , header , body);
-        return eventService.addEvent(request, newEvent, file);
-
+        Object addedEvent = eventService.addEvent(request, newEvent, file);
+        senderService.sendEmail(newEvent.getBookingEmail() , header , body);
+        return addedEvent;
     }
 
     @DeleteMapping("/{bookingId}")

@@ -12,4 +12,5 @@ public interface EventCategoryOwnerRepository extends JpaRepository<EventCategor
 
     @Query("select a.eventCategory.id from EventCategoryOwner a where a.user.id = :id ")
     List<Integer> findAllByUserId(@Param("id") int id);
+//    List<EventCategoryOwner> check(@Param("id") int id);
 }
